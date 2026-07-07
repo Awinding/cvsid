@@ -279,7 +279,7 @@ function makeRow(code = '', qty = '', note = '') {
     <div class="fields">
       <div class="field">
         <label>品號/條碼</label>
-        <input class="cell code" placeholder="輸入或掃描品號、條碼" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
+        <input class="cell code" placeholder="輸入或掃描品號、條碼" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
       </div>
       <div class="field">
         <label>數量</label>
