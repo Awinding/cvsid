@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CSV產生器">
+<meta name="theme-color" content="#f2f4f6">
+<title>CSV 產生器｜品號清單</title>
+<style>
+  :root {
+    --ink: #16232e;
+    --ink-soft: #5b6b78;
+    --line: #d8dfe5;
+    --paper: #f2f4f6;
+    --card: #ffffff;
+    --accent: #0f6b5c;
+    --accent-soft: #e3f1ee;
+    --danger: #b3422f;
+    --danger-soft: #fbeae6;
+    --mono: "SF Mono", Menlo, Consolas, monospace;
+    --toolbar-h: 64px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: calc(14px + env(safe-area-inset-top)) 14px calc(var(--toolbar-h) + 24px + env(safe-area-inset-bottom));
+    overscroll-behavior-y: contain;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; }
+  h1 .tag {
+    font-family: var(--mono);
+    font-size: .65rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 2px 7px;
+    vertical-align: 2px;
+    margin-left: 6px;
+    letter-spacing: .08em;
+  }
+  .stats { font-size: .8rem; color: var(--ink-soft); font-family: var(--mono); white-space: nowrap; }
+
+  /* ---------- 卡片式資料列 ---------- */
+  #rows { display: flex; flex-direction: column; gap: 10px; }
+  .row-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    position: relative;
+  }
+  .row-card .row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .row-card .num {
+    font-family: var(--mono);
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 5px;
+    padding: 2px 8px;
+    letter-spacing: .06em;
+  }
+  .btn-del {
+    border: none;
+    background: none;
+    color: #b9c2ca;
+    font-size: 1.05rem;
+    line-height: 1;
+    padding: 10px 12px;      /* 44pt 觸控區 */
+    margin: -10px -12px;
+    border-radius: 8px;
+  }
+  .btn-del:active { color: var(--danger); background: var(--danger-soft); }
+
+  .fields { display: grid; grid-template-columns: 1fr 96px; gap: 8px; }
+  .field label {
+    display: block;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .field label .opt { font-weight: 400; color: #9aa7b1; letter-spacing: 0; }
+  .field.note { grid-column: 1 / -1; }
+
+  input.cell {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fafbfc;
+    padding: 12px;
+    font-size: 16px;          /* ≥16px 防止 iOS 自動放大 */
+    font-family: inherit;
+    color: var(--ink);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input.cell.code, input.cell.qty { font-family: var(--mono); }
+  input.cell:focus { border-color: var(--accent); background: var(--accent-soft); }
+  input.cell::placeholder { color: #b9c2ca; }
+  input[type=number]::-webkit-inner-spin-button { display: none; }
+
+  /* ---------- 預覽 ---------- */
+  .preview-block { margin-top: 22px; }
+  .preview-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .preview-head h2 { font-size: .72rem; font-weight: 600; letter-spacing: .14em; color: var(--ink-soft); }
+  .preview-head button {
+    border: none;
+    background: none;
+    font-family: var(--mono);
+    font-size: .74rem;
+    color: var(--accent);
+    padding: 8px 0 8px 12px;
+  }
+  pre.preview {
+    background: #1d2b35;
+    color: #cfe6df;
+    font-family: var(--mono);
+    font-size: .74rem;
+    line-height: 1.7;
+    border-radius: 12px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: pre;
+    min-height: 64px;
+  }
+  pre.preview .hd { color: #7fb8a8; }
+
+  /* ---------- 固定底部工具列 ---------- */
+  .toolbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,.92);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    z-index: 10;
+  }
+  .toolbar-inner { display: flex; gap: 8px; width: 100%; max-width: 720px; }
+  button.btn {
+    flex: 1;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font-size: .9rem;
+    font-family: inherit;
+    font-weight: 500;
+    padding: 12px 4px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  button.btn:active { transform: scale(.97); }
+  button.btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    flex: 1.4;
+  }
+  button.btn.icon-only { flex: 0 0 52px; }
+  button.btn.icon-only.danger:active { border-color: var(--danger); color: var(--danger); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--toolbar-h) + 20px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(16px);
+    background: var(--ink);
+    color: #fff;
+    font-size: .85rem;
+    padding: 10px 20px;
+    border-radius: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 20;
+    max-width: 86vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* iPad：兩欄排列 */
+  @media (min-width: 700px) {
+    #rows { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>品號清單產生器<span class="tag">CSV</span></h1>
+    <div class="stats" id="stats">0 筆 · 總數 0</div>
+  </header>
+
+  <div id="rows"></div>
+
+  <div class="preview-block">
+    <div class="preview-head">
+      <h2>CSV 即時預覽</h2>
+      <button id="btnCopy">複製內容</button>
+    </div>
+    <pre class="preview" id="preview"></pre>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <button class="btn" id="btnAdd">＋ 新增</button>
+    <button class="btn" id="btnImport">📂 匯入</button>
+    <button class="btn primary" id="btnExport">⬆ 匯出 CSV</button>
+    <button class="btn icon-only danger" id="btnClear" title="清空">🗑</button>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".csv,text/csv,text/comma-separated-values" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+const HEADERS = ['品號/條碼', '數量', '備註'];
+const rowsEl = document.getElementById('rows');
+const preview = document.getElementById('preview');
+const stats = document.getElementById('stats');
+const toast = document.getElementById('toast');
+let toastTimer, rowSeq = 0;
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function makeRow(code = '', qty = '', note = '') {
+  const card = document.createElement('div');
+  card.className = 'row-card';
+  card.innerHTML = `
+    <div class="row-head">
+      <span class="num"></span>
+      <button class="btn-del" title="刪除">✕</button>
+    </div>
+    <div class="fields">
+      <div class="field">
+        <label>品號/條碼</label>
+        <input class="cell code" placeholder="輸入或掃描品號、條碼" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
+      </div>
+      <div class="field">
+        <label>數量</label>
+        <input class="cell qty" type="number" min="0" step="1" inputmode="numeric" pattern="[0-9]*" placeholder="0" enterkeyhint="next">
+      </div>
+      <div class="field note">
+        <label>備註 <span class="opt">選填</span></label>
+        <input class="cell note-input" placeholder="—" enterkeyhint="done">
+      </div>
+    </div>`;
+  card.querySelector('.code').value = code;
+  card.querySelector('.qty').value = qty;
+  card.querySelector('.note-input').value = note;
+
+  card.querySelector('.btn-del').addEventListener('click', () => {
+    card.remove();
+    if (!rowsEl.children.length) makeRow();
+    refresh();
+  });
+
+  const codeInp = card.querySelector('.code');
+  const qtyInp = card.querySelector('.qty');
+  const noteInp = card.querySelector('.note-input');
+  [codeInp, qtyInp, noteInp].forEach(inp => inp.addEventListener('input', refresh));
+
+  // Enter / 前往：品號→數量→備註→新增下一張卡片
+  codeInp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); qtyInp.focus(); } });
+  qtyInp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); noteInp.focus(); } });
+  noteInp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (card === rowsEl.lastElementChild) { const n = makeRow(); refresh(); n.querySelector('.code').focus(); n.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      else card.nextElementSibling.querySelector('.code').focus();
+    }
+  });
+
+  rowsEl.appendChild(card);
+  return card;
+}
+
+function getData() {
+  return [...rowsEl.children].map(c => ({
+    code: c.querySelector('.code').value.trim(),
+    qty: c.querySelector('.qty').value.trim(),
+    note: c.querySelector('.note-input').value.trim()
+  }));
+}
+const validRows = () => getData().filter(r => r.code !== '');
+
+const csvField = v => /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+
+function buildCSV() {
+  const lines = [HEADERS.join(',')];
+  for (const r of validRows()) lines.push([csvField(r.code), csvField(r.qty || '0'), csvField(r.note)].join(','));
+  return lines.join('\r\n');
+}
+
+const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function refresh() {
+  [...rowsEl.children].forEach((c, i) => c.querySelector('.num').textContent = String(i + 1).padStart(2, '0'));
+  const rows = validRows();
+  const total = rows.reduce((s, r) => s + (parseInt(r.qty, 10) || 0), 0);
+  stats.textContent = `${rows.length} 筆 · 總數 ${total}`;
+  const [hd, ...rest] = buildCSV().split('\r\n');
+  preview.innerHTML = `<span class="hd">${escapeHtml(hd)}</span>\n` +
+    (rest.length ? rest.map(escapeHtml).join('\n') : '<span style="color:#5f7a72">（輸入品號/條碼後即顯示）</span>');
+}
+
+/* ---------- 匯出（iOS 走分享面板，可存到檔案 App / AirDrop / LINE） ---------- */
+document.getElementById('btnExport').addEventListener('click', async () => {
+  const rows = validRows();
+  if (!rows.length) { showToast('尚無資料可匯出'); return; }
+  const d = new Date();
+  const name = `品號清單_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.csv`;
+  const bom = '\uFEFF'; // BOM 讓 Excel 正確辨識 UTF-8 中文
+  const blob = new Blob([bom + buildCSV()], { type: 'text/csv' });
+  const file = new File([blob], name, { type: 'text/csv' });
+
+  // iPhone / iPad：優先使用系統分享面板
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: name });
+      showToast(`已匯出 ${rows.length} 筆`);
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return; // 使用者取消
+    }
+  }
+  // 桌機或不支援分享時：直接下載
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+  showToast(`已匯出 ${rows.length} 筆 → ${name}`);
+});
+
+/* ---------- 複製 ---------- */
+document.getElementById('btnCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(buildCSV()); showToast('已複製 CSV 內容'); }
+  catch { showToast('複製失敗，請手動選取'); }
+});
+
+/* ---------- 匯入 ---------- */
+const fileInput = document.getElementById('fileInput');
+document.getElementById('btnImport').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  const f = fileInput.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const records = parseCSV(String(reader.result).replace(/^\uFEFF/, ''));
+    if (!records.length) { showToast('檔案沒有可讀取的資料'); return; }
+    let start = 0;
+    const h0 = (records[0][0] || '').trim().toLowerCase();
+    if (h0 === '品號' || h0 === '品號/條碼' || h0 === '條碼' || h0 === 'code' || h0 === 'barcode' || h0 === 'item') start = 1;
+    rowsEl.innerHTML = '';
+    let count = 0;
+    for (let i = start; i < records.length; i++) {
+      const [code = '', qty = '', note = ''] = records[i];
+      if (!code.trim()) continue;
+      makeRow(code.trim(), qty.trim(), note.trim());
+      count++;
+    }
+    if (!count) makeRow();
+    refresh();
+    showToast(`已匯入 ${count} 筆資料`);
+  };
+  reader.readAsText(f, 'utf-8');
+  fileInput.value = '';
+});
+
+// 完整 CSV 解析（支援引號、逗號、換行）
+function parseCSV(text) {
+  const records = [];
+  let field = '', record = [], inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { record.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        record.push(field); field = '';
+        if (record.some(x => x !== '')) records.push(record);
+        record = [];
+      } else field += c;
+    }
+  }
+  record.push(field);
+  if (record.some(x => x !== '')) records.push(record);
+  return records;
+}
+
+/* ---------- 其他 ---------- */
+document.getElementById('btnAdd').addEventListener('click', () => {
+  const c = makeRow();
+  refresh();
+  c.querySelector('.code').focus();
+  c.scrollIntoView({ block: 'center', behavior: 'smooth' });
+});
+
+document.getElementById('btnClear').addEventListener('click', () => {
+  if (validRows().length && !confirm('確定要清空所有資料？')) return;
+  rowsEl.innerHTML = '';
+  makeRow();
+  refresh();
+});
+
+// 初始三列
+makeRow(); makeRow(); makeRow();
+refresh();
+</script>
+</body>
+</html>
