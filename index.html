@@ -19,6 +19,8 @@
     --accent-soft: #e3f1ee;
     --danger: #b3422f;
     --danger-soft: #fbeae6;
+    --new: #e8604a;
+    --new-soft: #fdece8;
     --mono: "SF Mono", Menlo, Consolas, monospace;
     --toolbar-h: 64px;
   }
@@ -29,22 +31,35 @@
     background: var(--paper);
     color: var(--ink);
     min-height: 100vh;
-    padding: calc(14px + env(safe-area-inset-top)) 14px calc(var(--toolbar-h) + 24px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--toolbar-h) + 24px + env(safe-area-inset-bottom));
     overscroll-behavior-y: contain;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
 
+  /* ---------- 頂部 ---------- */
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 9;
+    background: rgba(242,244,246,.94);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
   header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 14px;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 14px 8px;
   }
-  h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; }
+  h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; }
   h1 .tag {
     font-family: var(--mono);
-    font-size: .65rem;
+    font-size: .62rem;
     font-weight: 600;
     color: var(--accent);
     background: var(--accent-soft);
@@ -54,23 +69,165 @@
     margin-left: 6px;
     letter-spacing: .08em;
   }
-  .stats { font-size: .8rem; color: var(--ink-soft); font-family: var(--mono); white-space: nowrap; }
+  .stats { font-size: .78rem; color: var(--ink-soft); font-family: var(--mono); white-space: nowrap; }
 
-  /* ---------- 卡片式資料列 ---------- */
-  #rows { display: flex; flex-direction: column; gap: 10px; }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 14px 10px;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    font-size: .88rem;
+    font-family: inherit;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tab.active { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 600; }
+  .tab .cnt {
+    font-family: var(--mono);
+    font-size: .68rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 6px;
+    margin-left: 4px;
+    vertical-align: 1px;
+  }
+
+  /* 子分頁 */
+  .subtabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 14px 10px;
+  }
+  .subtabs::-webkit-scrollbar { display: none; }
+  .subtab {
+    flex: 1 0 auto;
+    border: none;
+    background: #e6eaee;
+    color: var(--ink-soft);
+    font-size: .84rem;
+    font-family: inherit;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 9px;
+  }
+  .subtab.active { background: var(--accent); color: #fff; font-weight: 600; }
+  .subtab .cnt { font-family: var(--mono); font-size: .7rem; margin-left: 3px; opacity: .85; }
+
+  /* ---------- 搜尋 ---------- */
+  .searchbar { padding: 12px 0 2px; }
+  .searchbar input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    padding: 11px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--ink);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .searchbar input:focus { border-color: var(--accent); }
+  .searchbar input::placeholder { color: #b9c2ca; }
+
+  /* ---------- 商品清單 ---------- */
+  .subhead {
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    color: var(--ink-soft);
+    margin: 18px 2px 8px;
+  }
+  .items { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .subhead + .items { margin-top: 0; }
+  .item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .item.picked { border-color: var(--accent); background: #f4faf8; }
+  .item .info { flex: 1; min-width: 0; }
+  .item .name { font-size: .92rem; font-weight: 500; line-height: 1.35; }
+  .item .name .badge-new {
+    font-size: .62rem;
+    font-weight: 700;
+    color: var(--new);
+    background: var(--new-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: 1px;
+  }
+  .item .code { font-family: var(--mono); font-size: .72rem; color: #9aa7b1; margin-top: 2px; letter-spacing: .04em; }
+  .item.picked .code { color: var(--accent); }
+
+  .qtybox { display: flex; align-items: center; gap: 2px; }
+  .qbtn {
+    width: 42px; height: 42px;
+    border: 1px solid var(--line);
+    background: #fafbfc;
+    color: var(--ink);
+    font-size: 1.25rem;
+    line-height: 1;
+    border-radius: 10px;
+    font-family: var(--mono);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qbtn:active { transform: scale(.93); }
+  .qbtn.plus { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .qbtn.minus:disabled { opacity: .25; }
+  input.qval-input {
+    width: 44px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+    -webkit-appearance: none;
+    padding: 8px 0;
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: #9aa7b1;
+    font-size: .85rem;
+    padding: 40px 0;
+    line-height: 1.8;
+  }
+
+  /* ---------- 手動輸入卡片 ---------- */
+  #manualRows { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
   .row-card {
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 14px;
     padding: 12px 14px;
-    position: relative;
   }
-  .row-card .row-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
+  .row-card .row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .row-card .num {
     font-family: var(--mono);
     font-size: .72rem;
@@ -82,80 +239,67 @@
     letter-spacing: .06em;
   }
   .btn-del {
-    border: none;
-    background: none;
+    border: none; background: none;
     color: #b9c2ca;
-    font-size: 1.05rem;
-    line-height: 1;
-    padding: 10px 12px;      /* 44pt 觸控區 */
-    margin: -10px -12px;
+    font-size: 1.05rem; line-height: 1;
+    padding: 10px 12px; margin: -10px -12px;
     border-radius: 8px;
   }
   .btn-del:active { color: var(--danger); background: var(--danger-soft); }
-
   .fields { display: grid; grid-template-columns: 1fr 96px; gap: 8px; }
-  .field label {
-    display: block;
-    font-size: .68rem;
-    font-weight: 600;
-    letter-spacing: .1em;
-    color: var(--ink-soft);
-    margin-bottom: 4px;
-  }
+  .field label { display: block; font-size: .68rem; font-weight: 600; letter-spacing: .1em; color: var(--ink-soft); margin-bottom: 4px; }
   .field label .opt { font-weight: 400; color: #9aa7b1; letter-spacing: 0; }
   .field.note { grid-column: 1 / -1; }
-
   input.cell {
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 10px;
     background: #fafbfc;
     padding: 12px;
-    font-size: 16px;          /* ≥16px 防止 iOS 自動放大 */
+    font-size: 16px;
     font-family: inherit;
     color: var(--ink);
     outline: none;
     -webkit-appearance: none;
-    appearance: none;
   }
-  input.cell.code, input.cell.qty { font-family: var(--mono); }
+  input.cell.code-input, input.cell.qty { font-family: var(--mono); }
   input.cell:focus { border-color: var(--accent); background: var(--accent-soft); }
   input.cell::placeholder { color: #b9c2ca; }
   input[type=number]::-webkit-inner-spin-button { display: none; }
+  .btn-addrow {
+    margin-top: 12px;
+    width: 100%;
+    border: 1px dashed var(--line);
+    background: none;
+    color: var(--ink-soft);
+    font-size: .9rem;
+    font-family: inherit;
+    padding: 13px;
+    border-radius: 12px;
+  }
+  .btn-addrow:active { border-color: var(--accent); color: var(--accent); }
 
   /* ---------- 預覽 ---------- */
-  .preview-block { margin-top: 22px; }
-  .preview-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
+  .preview-block { margin-top: 24px; }
+  .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .preview-head h2 { font-size: .72rem; font-weight: 600; letter-spacing: .14em; color: var(--ink-soft); }
-  .preview-head button {
-    border: none;
-    background: none;
-    font-family: var(--mono);
-    font-size: .74rem;
-    color: var(--accent);
-    padding: 8px 0 8px 12px;
-  }
+  .preview-head button { border: none; background: none; font-family: var(--mono); font-size: .74rem; color: var(--accent); padding: 8px 0 8px 12px; }
   pre.preview {
     background: #1d2b35;
     color: #cfe6df;
     font-family: var(--mono);
-    font-size: .74rem;
+    font-size: .72rem;
     line-height: 1.7;
     border-radius: 12px;
     padding: 14px 16px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     white-space: pre;
-    min-height: 64px;
+    min-height: 56px;
   }
   pre.preview .hd { color: #7fb8a8; }
 
-  /* ---------- 固定底部工具列 ---------- */
+  /* ---------- 底部工具列 ---------- */
   .toolbar {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -164,12 +308,9 @@
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--line);
     padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-    display: flex;
-    gap: 8px;
-    justify-content: center;
     z-index: 10;
   }
-  .toolbar-inner { display: flex; gap: 8px; width: 100%; max-width: 720px; }
+  .toolbar-inner { display: flex; gap: 8px; max-width: 720px; margin: 0 auto; }
   button.btn {
     flex: 1;
     border: 1px solid var(--line);
@@ -187,13 +328,7 @@
     white-space: nowrap;
   }
   button.btn:active { transform: scale(.97); }
-  button.btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-    font-weight: 600;
-    flex: 1.4;
-  }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; flex: 1.6; }
   button.btn.icon-only { flex: 0 0 52px; }
   button.btn.icon-only.danger:active { border-color: var(--danger); color: var(--danger); }
 
@@ -216,36 +351,35 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* iPad：兩欄排列 */
   @media (min-width: 700px) {
-    #rows { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    h1 { font-size: 1.3rem; }
+    .items { display: grid; grid-template-columns: 1fr 1fr; }
+    #manualRows { display: grid; grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 1.25rem; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div class="top">
   <header>
     <h1>欣瀚資訊<span class="tag">CSV</span></h1>
-    <div class="stats" id="stats">0 筆 · 總數 0</div>
+    <div class="stats" id="stats"></div>
   </header>
+  <div class="tabs" id="tabs"></div>
+  <div class="subtabs" id="subtabs" style="display:none"></div>
+</div>
 
-  <div id="rows"></div>
-
-  <div class="preview-block">
-    <div class="preview-head">
-      <h2>CSV 即時預覽</h2>
-      <button id="btnCopy">複製內容</button>
-    </div>
-    <pre class="preview" id="preview"></pre>
+<div class="wrap">
+  <div class="searchbar" id="searchbar">
+    <input type="search" id="searchInput" placeholder="搜尋品名或條碼…" autocapitalize="off" autocorrect="off">
   </div>
+  <div id="content"></div>
 </div>
 
 <div class="toolbar">
   <div class="toolbar-inner">
-    <button class="btn" id="btnAdd">＋ 新增</button>
     <button class="btn" id="btnImport">📂 匯入</button>
-    <button class="btn primary" id="btnExport">⬆ 匯出 CSV</button>
+    <button class="btn primary" id="btnExport">⬆ 匯出</button>
     <button class="btn icon-only danger" id="btnClear" title="清空">🗑</button>
   </div>
 </div>
@@ -254,32 +388,333 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* =========================================================
+   商品資料（之後可直接替換此區塊，或改接資料庫）
+   格式：[品名, 條碼, 子分類, 是否新增品]
+========================================================= */
+const CATALOG = {
+  '自用品': [
+    ['收銀機紙捲','408883','耗材/紙品'],
+    ['IBon紙捲','345613','耗材/紙品'],
+    ['交貨便熱感紙捲','696866','耗材/紙品'],
+    ['POS列表A4紙','247951','耗材/紙品'],
+    ['A4專用紙','474126','耗材/紙品'],
+    ['A4特殊用紙160磅','099459','耗材/紙品'],
+    ['4X6貼紙','880568','耗材/紙品'],
+    ['空白價格卡','881658','耗材/紙品'],
+    ['ibon票券信封（10入）','099514','耗材/紙品'],
+    ['封膜機專用膜','360130','耗材/紙品'],
+    ['廁所大捲筒衛生紙','361543','清潔/衛生'],
+    ['萬用紙巾30包（箱）','349778','清潔/衛生'],
+    ['75%酒精（愛可寧）','420925','清潔/衛生'],
+    ['多功能超細纖維布（藍色）','643588','清潔/衛生',true],
+    ['多功能超細纖維布（咖啡）','348402','清潔/衛生',true],
+    ['加強型門市清潔劑','527545','清潔/衛生'],
+    ['商用型手壓拖把布盤','484395','清潔/衛生'],
+    ['大白熊','196534','清潔/衛生'],
+    ['12槳瓜布','149082','清潔/衛生'],
+    ['大中小刷子','537726','清潔/衛生'],
+    ['KEY-5氯性消毒粉（50入）','384184','清潔/衛生'],
+    ['C2茶機藥錠','593345','設備藥劑'],
+    ['台新咖啡機藥片＋粉','335989','設備藥劑'],
+    ['台新機現萃茶機藥片','353866','設備藥劑'],
+    ['紅色垃圾袋125個(捲)','822273','袋類'],
+    ['HDPE超大垃圾袋30','669644','袋類'],
+    ['廁所垃圾袋','807982','袋類'],
+    ['生理用品紙袋','553333','袋類'],
+    ['衛生棉用紙袋','553333','袋類'],
+    ['蒸煮玉米袋（300入）','524593','袋類'],
+    ['包子紙袋','577026','袋類'],
+    ['大亨堡紙袋','576852','袋類'],
+    ['茶葉蛋袋','340293','袋類'],
+    ['蒸地瓜紙袋','577136','袋類'],
+    ['烤地瓜紙袋','353556','袋類'],
+    ['熱壓吐司專用紙袋','649089','袋類'],
+    ['甜甜圈紙袋','577105','袋類'],
+    ['退貨用束帶','487193','包裝/膠帶'],
+    ['POP不殘膠雙面膠帶','095138','包裝/膠帶'],
+    ['36MM門市膠帶（綠）','324755','包裝/膠帶'],
+    ['12MM門市膠帶（綠）','324959','包裝/膠帶'],
+    ['冷凍交貨便提醒貼紙','602484','交貨便'],
+    ['冷凍交貨便外箱(90)','888917','交貨便'],
+    ['冷凍交貨便外箱(60)','888712','交貨便'],
+    ['常溫交貨便外箱(大)','505901','交貨便'],
+    ['常溫交貨便外箱(中)','404114','交貨便'],
+    ['拍賣出清貼紙（7折）','406715','貼紙/標籤'],
+    ['拍賣出清貼紙（5折）','406725','貼紙/標籤'],
+    ['拍賣出清貼紙（3折）','406704','貼紙/標籤'],
+    ['珍食8折/65折貼標','632515','貼紙/標籤',true],
+    ['冷凍食品專用盒','397759','餐具/雜項'],
+    ['微波隔熱紙板150個','519539','餐具/雜項'],
+    ['餐巾紙','121431','餐具/雜項'],
+    ['吸管（粗）','807984','餐具/雜項'],
+    ['6mmPLA(250)','576134','餐具/雜項'],
+    ['養樂多用小吸管','711624','餐具/雜項'],
+    ['便當筷子','537603','餐具/雜項'],
+    ['深口湯匙','566819','餐具/雜項'],
+    ['塑膠叉子','882411','餐具/雜項'],
+    ['手套M','856878','餐具/雜項'],
+    ['手套L','856874','餐具/雜項'],
+    ['熱狗機吸油布','196291','設備耗材'],
+    ['熱狗竹籤','305925','設備耗材'],
+    ['烤地瓜不沾布','353645','設備耗材'],
+    ['台酒空箱','980049','其他'],
+    ['甜點湯匙','339449','Kai'],
+    ['12CM湯匙','618965','Kai'],
+    ['茶機藥錠','593345','Kai'],
+    ['茶機藥水','367555','Kai'],
+    ['液糖2.6kg','387328','Kai'],
+  ],
+  '自助區': [
+    ['美式原味熱狗','633875','熱狗'],
+    ['三起司熱狗','561888','熱狗'],
+    ['日式碳烤風味熱狗','693505','熱狗'],
+    ['椒麻辣味熱狗','758042','熱狗'],
+    ['原味香腸','757177','熱狗'],
+    ['大亨堡夾心','349353','熱狗'],
+    ['奇美鮮肉包','594142','現蒸包子'],
+    ['奇美椒麻肉包','617350','現蒸包子'],
+    ['奇美香菇鮮筍肉包','617332','現蒸包子'],
+    ['奇美香蔥肉包','655150','現蒸包子'],
+    ['潮粵坊叉燒包','770302','現蒸包子'],
+    ['黃金水煮蛋','774044','蛋品'],
+    ['黃金滷蛋','744663','蛋品'],
+    ['茶葉蛋(10元)','430670','蛋品'],
+    ['所長茶葉蛋(18元)','812156','蛋品'],
+    ['蒸－黃金玉米','744700','玉米'],
+    ['蒸－糯玉米','744640','玉米'],
+    ['黃金玉米（進）','676444','玉米'],
+    ['台灣上等蕉_裸賣','384478','其他'],
+    ['台灣上等蕉_2入','538934','其他'],
+    ['養樂多100cc','148887','其他'],
+  ],
+  '關東煮': [
+    ['中華油豆腐','155308','關東煮 1'],
+    ['台灣黑輪','552772','關東煮 1'],
+    ['原味豬肉貢丸','447839','關東煮 1'],
+    ['高麗菜捲','490737','關東煮 1'],
+    ['飛魚卵海鮮卷','779072','關東煮 1'],
+    ['虱目魚丸','300106','關東煮 1'],
+    ['米血糕','170956','關東煮 1'],
+    ['白蘿蔔','123543','關東煮 1'],
+    ['手工高麗菜捲','490737','關東煮 1'],
+    ['爆汁新星腸','333128','關東煮 1'],
+    ['魚卵福袋','695596','關東煮 1'],
+    ['炙燒雞胸肉','760371','關東煮 1'],
+    ['海鮮蛋白棒','791042','關東煮 1'],
+    ['黃金魚蛋','488408','關東煮 2'],
+    ['花枝丸','490315','關東煮 2'],
+    ['黃金魚豆腐','689491','關東煮 2'],
+    ['日本一正野燒竹輪','545217','關東煮 2'],
+    ['金沙海鮮丸','705053','關東煮 2'],
+    ['金黃蝦仁餅','693473','關東煮 2'],
+    ['日本一正炸魚餅','709915','關東煮 2'],
+    ['日式雞肉丸','476033','關東煮 2'],
+    ['韓式魚板串','608294','關東煮 2'],
+    ['章魚燒串','693531','關東煮 2'],
+    ['黃金玉子揚','740287','關東煮 2'],
+  ],
+  '多拿滋': [
+    ['草莓波堤','341712','多拿滋'],
+    ['蜜糖波堤','341701','多拿滋'],
+    ['雙層巧克力波堤','341811','多拿滋'],
+    ['歡樂派對','751704','多拿滋'],
+    ['濃醇可可生波堤','661690','多拿滋'],
+    ['餅乾可可波堤','680736','多拿滋 2'],
+    ['濃熟成紅茶波堤','673384','多拿滋 2'],
+    ['白玉歐蕾波堤','673378','多拿滋 2'],
+    ['胭脂冷露波堤','673248','多拿滋 2'],
+  ],
+};
+
+/* ========================================================= */
 const HEADERS = ['品號/條碼', '數量', '備註'];
-const rowsEl = document.getElementById('rows');
-const preview = document.getElementById('preview');
+const MAIN_TABS = ['手動輸入', '自用品', '報廢品'];
+const SCRAP_SUBS = ['自助區', '關東煮', '多拿滋'];
+
+// 攤平品項
+const ITEMS = [];
+for (const cat of Object.keys(CATALOG)) {
+  CATALOG[cat].forEach((r, i) => {
+    ITEMS.push({ uid: `${cat}-${i}`, cat, name: r[0], code: r[1], sub: r[2] || '', isNew: !!r[3] });
+  });
+}
+const qty = {};
+let manualData = [];
+let activeMain = '報廢品';
+let activeSub = SCRAP_SUBS[0];
+let searchText = '';
+
+const tabsEl = document.getElementById('tabs');
+const subtabsEl = document.getElementById('subtabs');
+const contentEl = document.getElementById('content');
+const searchbarEl = document.getElementById('searchbar');
+const searchInput = document.getElementById('searchInput');
 const stats = document.getElementById('stats');
 const toast = document.getElementById('toast');
-let toastTimer, rowSeq = 0;
+let toastTimer;
 
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
-function makeRow(code = '', qty = '', note = '') {
+/* ---------- 範圍：目前主分頁包含哪些資料 ---------- */
+function scopeRows(main = activeMain) {
+  const rows = [];
+  if (main === '手動輸入') {
+    for (const r of manualData) if (r.code) rows.push({ code: r.code, qty: r.qty || '0', note: r.note });
+  } else {
+    const cats = main === '自用品' ? ['自用品'] : SCRAP_SUBS;
+    for (const it of ITEMS) {
+      if (cats.includes(it.cat) && qty[it.uid] > 0) rows.push({ code: it.code, qty: String(qty[it.uid]), note: it.name });
+    }
+  }
+  return rows;
+}
+
+/* ---------- 分頁列 ---------- */
+function renderTabs() {
+  tabsEl.innerHTML = '';
+  for (const t of MAIN_TABS) {
+    const n = scopeRows(t).length;
+    const b = document.createElement('button');
+    b.className = 'tab' + (t === activeMain ? ' active' : '');
+    b.innerHTML = n ? `${t}<span class="cnt">${n}</span>` : t;
+    b.addEventListener('click', () => {
+      activeMain = t;
+      searchText = ''; searchInput.value = '';
+      render();
+      window.scrollTo({ top: 0 });
+    });
+    tabsEl.appendChild(b);
+  }
+  // 子分頁（僅報廢品）
+  if (activeMain === '報廢品') {
+    subtabsEl.style.display = '';
+    subtabsEl.innerHTML = '';
+    for (const s of SCRAP_SUBS) {
+      const n = ITEMS.filter(it => it.cat === s && qty[it.uid] > 0).length;
+      const b = document.createElement('button');
+      b.className = 'subtab' + (s === activeSub ? ' active' : '');
+      b.innerHTML = n ? `${s}<span class="cnt">(${n})</span>` : s;
+      b.addEventListener('click', () => {
+        activeSub = s;
+        searchText = ''; searchInput.value = '';
+        render();
+        window.scrollTo({ top: 0 });
+      });
+      subtabsEl.appendChild(b);
+    }
+  } else {
+    subtabsEl.style.display = 'none';
+  }
+}
+
+/* ---------- 商品列 ---------- */
+function itemRow(it) {
+  const q = qty[it.uid] || 0;
+  const div = document.createElement('div');
+  div.className = 'item' + (q > 0 ? ' picked' : '');
+  div.innerHTML = `
+    <div class="info">
+      <div class="name">${it.name}${it.isNew ? '<span class="badge-new">新</span>' : ''}</div>
+      <div class="code">${it.code}</div>
+    </div>
+    <div class="qtybox">
+      <button class="qbtn minus" ${q === 0 ? 'disabled' : ''}>−</button>
+      <input class="qval-input" inputmode="numeric" pattern="[0-9]*" value="${q}" style="color:${q>0?'var(--accent)':'#c2ccd4'}">
+      <button class="qbtn plus">＋</button>
+    </div>`;
+  const inp = div.querySelector('.qval-input');
+  div.querySelector('.plus').addEventListener('click', () => setQty(it.uid, q + 1));
+  div.querySelector('.minus').addEventListener('click', () => setQty(it.uid, Math.max(0, q - 1)));
+  inp.addEventListener('change', () => setQty(it.uid, Math.max(0, parseInt(inp.value, 10) || 0)));
+  inp.addEventListener('focus', () => inp.select());
+  return div;
+}
+
+function setQty(uid, v) {
+  if (v > 0) qty[uid] = v; else delete qty[uid];
+  render();
+}
+
+/* ---------- 渲染 ---------- */
+function render() {
+  renderTabs();
+  updateStats();
+  contentEl.innerHTML = '';
+  searchbarEl.style.display = activeMain === '手動輸入' ? 'none' : '';
+
+  if (activeMain === '手動輸入') renderManual();
+  else if (activeMain === '自用品') renderCatalog('自用品');
+  else renderCatalog(activeSub);
+
+  renderPreview();
+}
+
+function renderCatalog(cat) {
+  const kw = searchText.trim().toLowerCase();
+  let list = ITEMS.filter(it => it.cat === cat);
+  if (kw) list = list.filter(it => it.name.toLowerCase().includes(kw) || it.code.includes(kw));
+  if (!list.length) {
+    contentEl.innerHTML = '<div class="empty-hint">找不到符合的品項</div>';
+    return;
+  }
+  let lastSub = null, group = null;
+  for (const it of list) {
+    if (it.sub !== lastSub) {
+      lastSub = it.sub;
+      if (it.sub) {
+        const h = document.createElement('div');
+        h.className = 'subhead';
+        h.textContent = it.sub;
+        contentEl.appendChild(h);
+      }
+      group = document.createElement('div');
+      group.className = 'items';
+      contentEl.appendChild(group);
+    }
+    group.appendChild(itemRow(it));
+  }
+}
+
+/* ---------- 手動輸入 ---------- */
+function renderManual() {
+  const box = document.createElement('div');
+  box.id = 'manualRows';
+  contentEl.appendChild(box);
+  if (!manualData.length) manualData.push({ code: '', qty: '', note: '' });
+  manualData.forEach((r, i) => box.appendChild(manualCard(r, i)));
+
+  const add = document.createElement('button');
+  add.className = 'btn-addrow';
+  add.textContent = '＋ 新增一列';
+  add.addEventListener('click', () => {
+    manualData.push({ code: '', qty: '', note: '' });
+    render();
+    const cards = document.querySelectorAll('#manualRows .row-card');
+    const last = cards[cards.length - 1];
+    last.querySelector('.code-input').focus();
+    last.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+  contentEl.appendChild(add);
+}
+
+function manualCard(r, idx) {
   const card = document.createElement('div');
   card.className = 'row-card';
   card.innerHTML = `
     <div class="row-head">
-      <span class="num"></span>
+      <span class="num">${String(idx + 1).padStart(2, '0')}</span>
       <button class="btn-del" title="刪除">✕</button>
     </div>
     <div class="fields">
       <div class="field">
         <label>品號/條碼</label>
-        <input class="cell code" placeholder="輸入或掃描品號、條碼" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
+        <input class="cell code-input" placeholder="輸入或掃描品號、條碼" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
       </div>
       <div class="field">
         <label>數量</label>
@@ -290,86 +725,103 @@ function makeRow(code = '', qty = '', note = '') {
         <input class="cell note-input" placeholder="—" enterkeyhint="done">
       </div>
     </div>`;
-  card.querySelector('.code').value = code;
-  card.querySelector('.qty').value = qty;
-  card.querySelector('.note-input').value = note;
-
-  card.querySelector('.btn-del').addEventListener('click', () => {
-    card.remove();
-    if (!rowsEl.children.length) makeRow();
-    refresh();
-  });
-
-  const codeInp = card.querySelector('.code');
+  const codeInp = card.querySelector('.code-input');
   const qtyInp = card.querySelector('.qty');
   const noteInp = card.querySelector('.note-input');
-  [codeInp, qtyInp, noteInp].forEach(inp => inp.addEventListener('input', refresh));
+  codeInp.value = r.code; qtyInp.value = r.qty; noteInp.value = r.note;
 
-  // Enter / 前往：品號→數量→備註→新增下一張卡片
+  codeInp.addEventListener('input', () => { r.code = codeInp.value.trim(); updateStats(); renderTabs(); refreshPreviewOnly(); });
+  qtyInp.addEventListener('input', () => { r.qty = qtyInp.value.trim(); updateStats(); refreshPreviewOnly(); });
+  noteInp.addEventListener('input', () => { r.note = noteInp.value.trim(); refreshPreviewOnly(); });
+
   codeInp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); qtyInp.focus(); } });
   qtyInp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); noteInp.focus(); } });
   noteInp.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (card === rowsEl.lastElementChild) { const n = makeRow(); refresh(); n.querySelector('.code').focus(); n.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
-      else card.nextElementSibling.querySelector('.code').focus();
+      if (idx === manualData.length - 1) manualData.push({ code: '', qty: '', note: '' });
+      render();
+      const cards = document.querySelectorAll('#manualRows .row-card');
+      const next = cards[idx + 1];
+      if (next) { next.querySelector('.code-input').focus(); next.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
     }
   });
 
-  rowsEl.appendChild(card);
+  card.querySelector('.btn-del').addEventListener('click', () => {
+    manualData.splice(idx, 1);
+    render();
+  });
   return card;
 }
 
-function getData() {
-  return [...rowsEl.children].map(c => ({
-    code: c.querySelector('.code').value.trim(),
-    qty: c.querySelector('.qty').value.trim(),
-    note: c.querySelector('.note-input').value.trim()
-  }));
+/* ---------- 預覽 ---------- */
+function renderPreview() {
+  const rows = scopeRows();
+  const pb = document.createElement('div');
+  pb.className = 'preview-block';
+  pb.innerHTML = `
+    <div class="preview-head">
+      <h2>${activeMain} · CSV 預覽</h2>
+      <button id="btnCopy">複製內容</button>
+    </div>
+    <pre class="preview" id="preview"></pre>`;
+  contentEl.appendChild(pb);
+  fillPreview(rows);
+  document.getElementById('btnCopy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(buildCSV()); showToast('已複製 CSV 內容'); }
+    catch { showToast('複製失敗，請手動選取'); }
+  });
 }
-const validRows = () => getData().filter(r => r.code !== '');
+
+function fillPreview(rows) {
+  const pre = document.getElementById('preview');
+  if (!pre) return;
+  const [hd, ...rest] = buildCSV(rows).split('\r\n');
+  pre.innerHTML = `<span class="hd">${escapeHtml(hd)}</span>\n` +
+    (rest.length ? rest.map(escapeHtml).join('\n') : '<span style="color:#5f7a72">（本頁尚無資料）</span>');
+}
+function refreshPreviewOnly() { fillPreview(scopeRows()); }
+
+/* ---------- 統計 / CSV ---------- */
+function updateStats() {
+  const rows = scopeRows();
+  const total = rows.reduce((s, r) => s + (parseInt(r.qty, 10) || 0), 0);
+  stats.textContent = `${activeMain} ${rows.length} 品項 · 總數 ${total}`;
+}
 
 const csvField = v => /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-function buildCSV() {
+function buildCSV(rows = scopeRows()) {
   const lines = [HEADERS.join(',')];
-  for (const r of validRows()) lines.push([csvField(r.code), csvField(r.qty || '0'), csvField(r.note)].join(','));
+  for (const r of rows) lines.push([csvField(r.code), csvField(r.qty || '0'), csvField(r.note)].join(','));
   return lines.join('\r\n');
 }
 
-const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/* ---------- 搜尋 ---------- */
+searchInput.addEventListener('input', () => { searchText = searchInput.value; render(); searchInput.focus(); });
 
-function refresh() {
-  [...rowsEl.children].forEach((c, i) => c.querySelector('.num').textContent = String(i + 1).padStart(2, '0'));
-  const rows = validRows();
-  const total = rows.reduce((s, r) => s + (parseInt(r.qty, 10) || 0), 0);
-  stats.textContent = `${rows.length} 筆 · 總數 ${total}`;
-  const [hd, ...rest] = buildCSV().split('\r\n');
-  preview.innerHTML = `<span class="hd">${escapeHtml(hd)}</span>\n` +
-    (rest.length ? rest.map(escapeHtml).join('\n') : '<span style="color:#5f7a72">（輸入品號/條碼後即顯示）</span>');
+/* ---------- 匯出：依所在分頁輸出，檔名 = 年月日時分 + 分頁名 ---------- */
+function timestamp() {
+  const d = new Date(); // 裝置本地時間
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-/* ---------- 匯出（iOS 走分享面板，可存到檔案 App / AirDrop / LINE） ---------- */
 document.getElementById('btnExport').addEventListener('click', async () => {
-  const rows = validRows();
-  if (!rows.length) { showToast('尚無資料可匯出'); return; }
-  const d = new Date();
-  const name = `品號清單_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.csv`;
-  const bom = '\uFEFF'; // BOM 讓 Excel 正確辨識 UTF-8 中文
-  const blob = new Blob([bom + buildCSV()], { type: 'text/csv' });
+  const rows = scopeRows();
+  if (!rows.length) { showToast(`「${activeMain}」尚無資料可匯出`); return; }
+  const name = `${timestamp()}${activeMain}.csv`;   // 例：202607131211報廢品.csv
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + buildCSV(rows)], { type: 'text/csv' });
   const file = new File([blob], name, { type: 'text/csv' });
 
-  // iPhone / iPad：優先使用系統分享面板
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title: name });
-      showToast(`已匯出 ${rows.length} 筆`);
+      showToast(`已匯出 ${name}`);
       return;
-    } catch (err) {
-      if (err.name === 'AbortError') return; // 使用者取消
-    }
+    } catch (err) { if (err.name === 'AbortError') return; }
   }
-  // 桌機或不支援分享時：直接下載
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = name;
@@ -377,13 +829,7 @@ document.getElementById('btnExport').addEventListener('click', async () => {
   a.click();
   a.remove();
   URL.revokeObjectURL(a.href);
-  showToast(`已匯出 ${rows.length} 筆 → ${name}`);
-});
-
-/* ---------- 複製 ---------- */
-document.getElementById('btnCopy').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(buildCSV()); showToast('已複製 CSV 內容'); }
-  catch { showToast('複製失敗，請手動選取'); }
+  showToast(`已匯出 ${name}`);
 });
 
 /* ---------- 匯入 ---------- */
@@ -398,24 +844,25 @@ fileInput.addEventListener('change', () => {
     if (!records.length) { showToast('檔案沒有可讀取的資料'); return; }
     let start = 0;
     const h0 = (records[0][0] || '').trim().toLowerCase();
-    if (h0 === '品號' || h0 === '品號/條碼' || h0 === '條碼' || h0 === 'code' || h0 === 'barcode' || h0 === 'item') start = 1;
-    rowsEl.innerHTML = '';
-    let count = 0;
+    if (['品號', '品號/條碼', '條碼', 'code', 'barcode', 'item'].includes(h0)) start = 1;
+
+    let matched = 0, manualCnt = 0;
     for (let i = start; i < records.length; i++) {
-      const [code = '', qty = '', note = ''] = records[i];
-      if (!code.trim()) continue;
-      makeRow(code.trim(), qty.trim(), note.trim());
-      count++;
+      const [code = '', q = '', note = ''] = records[i].map(x => x.trim());
+      if (!code) continue;
+      const n = parseInt(q, 10) || 0;
+      let it = ITEMS.find(x => x.code === code && x.name === note);
+      if (!it) it = ITEMS.find(x => x.code === code);
+      if (it && n > 0) { qty[it.uid] = (qty[it.uid] || 0) + n; matched++; }
+      else { manualData.push({ code, qty: q, note }); manualCnt++; }
     }
-    if (!count) makeRow();
-    refresh();
-    showToast(`已匯入 ${count} 筆資料`);
+    render();
+    showToast(`已匯入：目錄 ${matched} 項${manualCnt ? `、手動 ${manualCnt} 項` : ''}`);
   };
   reader.readAsText(f, 'utf-8');
   fileInput.value = '';
 });
 
-// 完整 CSV 解析（支援引號、逗號、換行）
 function parseCSV(text) {
   const records = [];
   let field = '', record = [], inQuotes = false;
@@ -440,24 +887,21 @@ function parseCSV(text) {
   return records;
 }
 
-/* ---------- 其他 ---------- */
-document.getElementById('btnAdd').addEventListener('click', () => {
-  const c = makeRow();
-  refresh();
-  c.querySelector('.code').focus();
-  c.scrollIntoView({ block: 'center', behavior: 'smooth' });
-});
-
+/* ---------- 清空（僅清目前分頁） ---------- */
 document.getElementById('btnClear').addEventListener('click', () => {
-  if (validRows().length && !confirm('確定要清空所有資料？')) return;
-  rowsEl.innerHTML = '';
-  makeRow();
-  refresh();
+  const rows = scopeRows();
+  if (rows.length && !confirm(`確定要清空「${activeMain}」的資料？`)) return;
+  if (activeMain === '手動輸入') {
+    manualData = [];
+  } else {
+    const cats = activeMain === '自用品' ? ['自用品'] : SCRAP_SUBS;
+    for (const it of ITEMS) if (cats.includes(it.cat)) delete qty[it.uid];
+  }
+  render();
+  showToast(`已清空「${activeMain}」`);
 });
 
-// 初始三列
-makeRow(); makeRow(); makeRow();
-refresh();
+render();
 </script>
 </body>
 </html>
